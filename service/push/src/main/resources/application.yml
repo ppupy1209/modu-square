@@ -45,6 +45,12 @@ push:
     # 발송 중(SENDING)으로 선점한 건을 다른 처리가 가져가지 못하게 막는 시간.
     # 업체 호출 한 번은 read-timeout(3초)을 넘지 않으므로, 이 시간이 지나도 SENDING이면 처리하던 인스턴스가 죽은 것으로 본다.
     lease: 10s
+    retry:
+      # 최초 발송 포함 4번. 재시도 간격은 2초, 6초, 18초로 늘린다.
+      # 업체의 짧은 장애는 넘기고, 26초 넘게 이어지는 실패는 DLT로 격리한다.
+      attempts: 4
+      delay-ms: 2000
+      multiplier: 3
 
 management:
   endpoints:

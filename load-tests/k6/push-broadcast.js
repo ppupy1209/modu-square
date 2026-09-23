@@ -86,6 +86,11 @@ function submitTwiceAndWatch() {
     const res = http.get(`${urls.push}/v1/push/broadcasts/${firstId}`, {
       tags: { name: "push_broadcast_status" },
     });
+    // Push Service가 재시작하는 동안에는 조회가 실패한다. 발송은 서버에서 계속되므로 다음 조회를 기다린다.
+    if (res.status !== 200) {
+      console.log(`status unavailable (${res.status})`);
+      continue;
+    }
     console.log(`status ${res.body}`);
     if (res.json("status") === "COMPLETED") {
       return;
