@@ -499,6 +499,8 @@ services:
       NOTIFICATION_URL: http://notification:9006
       MEDIA_URL: http://media:9007
       AUTH_URL: http://auth:9008
+      PUSH_URL: http://push:9009
+      PUSH_PROVIDER_URL: http://push-provider:8080
       TEST_ID: ${TEST_ID:-}
       TEST_TYPE: ${TEST_TYPE:-}
       DATASET: ${DATASET:-15000100}
@@ -535,6 +537,10 @@ services:
       SPIKE_DURATION: ${SPIKE_DURATION:-}
       RECOVER_DURATION: ${RECOVER_DURATION:-}
       SOAK_RATIO: ${SOAK_RATIO:-}
+      # push-broadcast-*.js
+      PUSH_MODE: ${PUSH_MODE:-}
+      PUSH_TITLE: ${PUSH_TITLE:-}
+      PUSH_CLIENT_TIMEOUT: ${PUSH_CLIENT_TIMEOUT:-}
     depends_on:
       article:
         condition: service_started

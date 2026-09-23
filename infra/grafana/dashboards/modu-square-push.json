@@ -1,0 +1,240 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "5s",
+  "schemaVersion": 41,
+  "tags": [
+    "modu-square",
+    "push",
+    "load-test"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Modu Square 공지 발송",
+  "uid": "modu-square-push",
+  "version": 1,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "외부 업체 수신 건수",
+      "description": "업체 대역이 기기로 전달한 건수입니다. 전달 건수가 고유 수신보다 많으면 같은 기기가 같은 공지를 다시 받은 것입니다.",
+      "id": 1,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "max(push_provider_delivered_total)",
+          "legendFormat": "전달 건수",
+          "refId": "A"
+        },
+        {
+          "expr": "max(push_provider_unique_delivered)",
+          "legendFormat": "고유 수신 기기",
+          "refId": "B"
+        },
+        {
+          "expr": "max(push_provider_duplicate_delivered_total)",
+          "legendFormat": "중복 수신",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "전달 건수"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "고유 수신 기기"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "중복 수신"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "interval": "5s"
+    },
+    {
+      "type": "timeseries",
+      "title": "발송 처리량과 대기 메시지",
+      "description": "업체가 전달에 성공한 초당 건수, 실패로 응답한 초당 건수, 아직 처리하지 못한 발송 메시지 수입니다.",
+      "id": 2,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(push_provider_requests_total{status=\"200\"}[20s]))",
+          "legendFormat": "전달 성공 (건/s)",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(push_provider_requests_total{status=~\"410|503\"}[20s]))",
+          "legendFormat": "실패 응답 (건/s)",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(kafka_consumergroup_lag{consumergroup=\"modu-square-push-service\",topic=\"push-send\"})",
+          "legendFormat": "대기 메시지 (건)",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "전달 성공 (건/s)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "실패 응답 (건/s)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "대기 메시지 (건)"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "interval": "5s"
+    }
+  ]
+}

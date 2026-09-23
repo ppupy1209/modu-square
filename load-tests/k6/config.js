@@ -19,6 +19,8 @@ export const urls = {
   hotArticle: env("HOT_ARTICLE_URL", "http://localhost:9004"),
   articleRead: env("ARTICLE_READ_URL", "http://localhost:9005"),
   auth: env("AUTH_URL", "http://localhost:9008"),
+  push: env("PUSH_URL", "http://localhost:9009"),
+  pushProvider: env("PUSH_PROVIDER_URL", "http://localhost:9010"),
 };
 
 // 조회 대상 자유게시판. 15,000,100건이 들어 있다.
