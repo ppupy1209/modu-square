@@ -45,19 +45,14 @@ public class PushBroadcast {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    public static PushBroadcast sending(String title, String body, LocalDateTime now) {
+    public static PushBroadcast accept(String idempotencyKey, String title, String body, LocalDateTime now) {
         PushBroadcast broadcast = new PushBroadcast();
+        broadcast.idempotencyKey = idempotencyKey;
         broadcast.title = title;
         broadcast.body = body;
-        broadcast.status = PushBroadcastStatus.SENDING;
+        broadcast.status = PushBroadcastStatus.ACCEPTED;
         broadcast.createdAt = now;
         broadcast.updatedAt = now;
         return broadcast;
-    }
-
-    public void complete(int targetCount, LocalDateTime now) {
-        this.targetCount = targetCount;
-        this.status = PushBroadcastStatus.COMPLETED;
-        this.updatedAt = now;
     }
 }
