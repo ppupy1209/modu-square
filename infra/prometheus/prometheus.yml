@@ -20,6 +20,18 @@ scrape_configs:
           - media:9007
           - auth:9008
 
+  # 공지 발송은 1~2분 안에 끝나 10초 간격으로는 변화가 뭉개진다. 발송 경로만 5초 간격으로 수집한다.
+  - job_name: modu-square-push
+    scrape_interval: 5s
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: [push:9009]
+
+  - job_name: push-provider
+    scrape_interval: 5s
+    static_configs:
+      - targets: [push-provider:8080]
+
   - job_name: modu-square-mysql
     static_configs:
       - targets: [mysql-exporter:9104]

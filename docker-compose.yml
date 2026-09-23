@@ -50,7 +50,7 @@ services:
     image: mysql:8.4
     entrypoint: ["/bin/sh", "-c"]
     command:
-      - mysql -hmysql -uroot -proot < /migrations/02-media.sql && mysql -hmysql -uroot -proot < /migrations/03-community-data.sql && mysql -hmysql -uroot -proot < /migrations/04-product-board.sql && mysql -hmysql -uroot -proot < /migrations/05-initial-comment-time.sql && mysql -hmysql -uroot -proot < /migrations/06-community-like-consistency.sql && mysql -hmysql -uroot -proot < /migrations/07-auth.sql && mysql -hmysql -uroot -proot < /migrations/08-article-writer.sql
+      - mysql -hmysql -uroot -proot < /migrations/02-media.sql && mysql -hmysql -uroot -proot < /migrations/03-community-data.sql && mysql -hmysql -uroot -proot < /migrations/04-product-board.sql && mysql -hmysql -uroot -proot < /migrations/05-initial-comment-time.sql && mysql -hmysql -uroot -proot < /migrations/06-community-like-consistency.sql && mysql -hmysql -uroot -proot < /migrations/07-auth.sql && mysql -hmysql -uroot -proot < /migrations/08-article-writer.sql && mysql -hmysql -uroot -proot < /migrations/09-push.sql && mysql -hmysql -uroot -proot < /migrations/10-push-device-seed.sql
     volumes:
       - ./infra/mysql/migrations:/migrations:ro
     depends_on:
@@ -313,6 +313,43 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
+  push:
+    build:
+      context: .
+      args: { SERVICE: push }
+    mem_limit: 512m
+    environment:
+      <<: *service-environment
+      DB_URL: jdbc:mysql://mysql:3306/push?rewriteBatchedStatements=true
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      PUSH_PROVIDER_URL: http://push-provider:8080
+    ports: ["9009:9009"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      media-migrate:
+        condition: service_completed_successfully
+      push-provider:
+        condition: service_started
+    restart: unless-stopped
+
+  # 외부 푸시 발송 업체 대역. 응답 지연과 실패를 재현하고, 같은 기기가 같은 공지를 두 번 받았는지 센다.
+  push-provider:
+    image: node:22-alpine
+    command: ["node", "/app/server.js"]
+    environment:
+      PORT: 8080
+      LATENCY_MS: 30
+      LATENCY_JITTER_MS: 10
+      TRANSIENT_FAILURE_RATE: 0.03
+    volumes:
+      - ./infra/push-provider-mock:/app:ro
+    ports: ["9010:8080"]
+    restart: unless-stopped
+
   web:
     build: ./web
     environment:
@@ -369,6 +406,7 @@ services:
       - notification
       - media
       - auth
+      - push
 
   mysql-exporter:
     image: prom/mysqld-exporter:v0.15.1

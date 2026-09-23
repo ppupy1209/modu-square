@@ -1,0 +1,39 @@
+server:
+  port: 9009
+  shutdown: graceful
+  tomcat:
+    mbeanregistry:
+      enabled: true
+
+spring:
+  application:
+    name: modu-square-push-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # rewriteBatchedStatements: JdbcTemplate batch insert를 한 번의 다중 행 INSERT로 보낸다.
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3307/push?rewriteBatchedStatements=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+
+push:
+  provider:
+    url: ${PUSH_PROVIDER_URL:http://127.0.0.1:9010}
+    connect-timeout: 1s
+    read-timeout: 3s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+    tags:
+      service: ${spring.application.name}
