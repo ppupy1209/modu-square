@@ -34,7 +34,7 @@ Modu Square는 오늘의 생각을 나누고, 다른 사람의 취향과 질문�
 
 MySQL의 비즈니스 데이터 저장과 Kafka 이벤트 발행은 서로 다른 시스템에서 실행되므로 하나의 트랜잭션으로 묶을 수 없습니다. DB 저장만 성공하거나 Kafka 이벤트만 먼저 전달되면 서비스 간 데이터가 어긋날 수 있습니다. 이를 막기 위해 비즈니스 데이터와 이벤트를 같은 MySQL 트랜잭션의 Outbox에 저장합니다. 커밋이 끝난 뒤 Kafka로 발행하며 전송에 성공한 이벤트만 삭제합니다. 실패한 이벤트는 DB에 남겨 스케줄러가 다시 발행합니다.
 
-- [MessageRelay.java에서 구현 보기](https://github.com/ppupy1209/modu-square/blob/main/common/outbox-message-relay/src/main/java/board/common/outboxmessagerelay/MessageRelay.java)
+- [Outbox 저장과 Kafka 발행, 재발행 코드 (MessageRelay.java)](https://github.com/ppupy1209/modu-square/blob/main/common/outbox-message-relay/src/main/java/board/common/outboxmessagerelay/MessageRelay.java)
 
 ## 삭제된 게시글 반복 조회
 
@@ -44,7 +44,7 @@ MySQL의 비즈니스 데이터 저장과 Kafka 이벤트 발행은 서로 다�
 
 ### 해결
 
-게시글 서비스에서 404 응답을 받은 게시글 ID는 Redis에 `MISSING` 값으로 60초 동안 저장했습니다. 타임아웃과 5xx는 캐시하지 않아 게시글 서비스의 장애를 게시글 부재로 오인하지 않도록 했습니다.
+게시글 서비스에서 404 응답을 받은 게시글 ID는 Redis에 `MISSING` 값으로 60~70초 동안 저장했습니다. 타임아웃과 5xx는 캐시하지 않아 게시글 서비스의 장애를 게시글 부재로 오인하지 않도록 했습니다.
 
 ## 로컬 실행
 
@@ -69,9 +69,9 @@ docker compose up --build -d
 docker compose ps
 ```
 
-준비가 끝나면 브라우저에서 `http://localhost:3000`을 여세요. 첫 실행에는 주제별 게시글과 댓글, 좋아요, 조회수, 인기글 데이터가 함께 들어갑니다. Auth Service도 함께 실행되지만 기존 조회·체험 API에는 로그인을 강제하지 않으므로, 가입하거나 데이터를 직접 만들지 않아도 Guest로 주요 기능을 바로 둘러볼 수 있습니다.
+준비가 끝나면 브라우저에서 `http://localhost:3000`을 여세요. 첫 실행에는 주제별 게시글과 댓글, 좋아요, 조회수, 인기글 데이터가 함께 들어갑니다. Auth Service도 함께 실행되지만 기존 조회와 체험 API에는 로그인을 강제하지 않으므로, 가입하거나 데이터를 직접 만들지 않아도 Guest로 주요 기능을 바로 둘러볼 수 있습니다.
 
-상단의 `Guest`를 누르면 로그인·회원가입 화면으로 이동할 수 있습니다. 회원가입을 마치면 같은 이메일로 로그인하고, 로그인 뒤 상단 닉네임을 눌러 이메일과 로그아웃 메뉴를 확인할 수 있습니다. 로그인 상태에서 새로 작성한 글은 회원 닉네임으로 표시됩니다. 초기 데이터와 Guest가 작성한 글은 기존처럼 `modu_{writerId}`로 보여 기존 데이터를 그대로 유지합니다.
+상단의 `Guest`를 누른 뒤 `로그인 · 회원가입`을 고르면 로그인과 회원가입 화면으로 이동합니다. 회원가입을 마치면 같은 이메일로 로그인하고, 로그인 뒤 상단 닉네임을 눌러 이메일과 로그아웃 메뉴를 확인할 수 있습니다. 로그인 상태에서 새로 작성한 글은 회원 닉네임으로 표시됩니다. 초기 데이터와 Guest가 작성한 글은 기존처럼 `modu_{writerId}`로 보여 기존 데이터를 그대로 유지합니다.
 
 ### 3. 서비스 종료하기
 
