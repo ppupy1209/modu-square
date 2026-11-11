@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = "modu.hot-article.rebuild.enabled=false")
 class HotArticleListRepositoryTest {
     @Autowired
     HotArticleListRepository hotArticleListRepository;

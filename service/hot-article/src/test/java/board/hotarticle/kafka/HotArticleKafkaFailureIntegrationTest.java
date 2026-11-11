@@ -46,7 +46,8 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer",
                 "spring.kafka.producer.value-serializer=org.apache.kafka.common.serialization.StringSerializer",
                 "modu.kafka.failure.retry-interval-ms=10",
-                "modu.kafka.failure.max-attempts=3"
+                "modu.kafka.failure.max-attempts=3",
+                "modu.hot-article.rebuild.enabled=false"
         }
 )
 @EmbeddedKafka(

@@ -19,7 +19,7 @@ public class HotArticleScoreUpdater {
     private final HotArticleScoreCalculator hotArticleScoreCalculator;
     private final ArticleCreatedTimeRepository articleCreatedTimeRepository;
 
-    private static final long HOT_ARTICLE_COUNT = 10;
+    static final long HOT_ARTICLE_COUNT = 10;
 
     public void update(Event<EventPayload> event, EventHandler<EventPayload> eventHandler) {
         Long articleId = eventHandler.findArticleId(event);

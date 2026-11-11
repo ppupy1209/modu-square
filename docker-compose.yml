@@ -232,6 +232,7 @@ services:
     environment:
       <<: *service-environment
       ARTICLE_SERVICE_URL: http://article:9000
+      ARTICLE_READ_SERVICE_URL: http://article-read:9005
     ports: ["9004:9004"]
     depends_on: *service-dependencies
     restart: unless-stopped
