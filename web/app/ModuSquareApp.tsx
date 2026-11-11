@@ -9,6 +9,7 @@ import {
   fetchAllArticles,
   fetchPopularArticles,
   getOrCreateGuestIdentity,
+  HotArticle,
   LIKE_API,
   publishedAt,
   requestJson,
@@ -32,7 +33,7 @@ export function ModuSquareApp() {
   const [category, setCategory] = useState("전체");
   const [query, setQuery] = useState("");
   const [articles, setArticles] = useState<Article[]>([]);
-  const [popularArticles, setPopularArticles] = useState<Article[]>([]);
+  const [popularArticles, setPopularArticles] = useState<HotArticle[]>([]);
   const [notice, setNotice] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -171,7 +172,7 @@ export function ModuSquareApp() {
     if (!guestUserId || !checkedLikeIds.has(articleId) || busyLikeIds.has(articleId)) return;
     const nextLiked = !likedIds.has(articleId);
     const delta = nextLiked ? 1 : -1;
-    const updateLikeCount = (items: Article[]) => items.map((article) => article.articleId === articleId
+    const updateLikeCount = <T extends Pick<Article, "articleId" | "articleLikeCount">>(items: T[]) => items.map((article) => article.articleId === articleId
       ? { ...article, articleLikeCount: Math.max(0, (article.articleLikeCount ?? 0) + delta) }
       : article);
 
