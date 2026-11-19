@@ -4,7 +4,6 @@ Modu Square는 오늘의 생각을 나누고, 다른 사람의 취향과 질문�
 
 ![Modu Square 메인 화면](docs/images/modu-square-home-20261119.jpg)
 
-화면은 로컬 예시 게시글로 촬영했습니다.
 
 ## 주요 기능
 
