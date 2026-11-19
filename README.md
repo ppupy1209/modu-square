@@ -21,7 +21,7 @@ Modu Square는 오늘의 생각을 나누고, 다른 사람의 취향과 질문�
 
 ### 오늘의 인기글
 
-![오늘의 인기글과 좋아요, 댓글 수](docs/images/modu-square-popular-20261119-v2.jpg)
+![오늘의 인기글과 좋아요, 댓글 수](docs/images/modu-square-popular-20261119-v3.jpg)
 
 좋아요, 댓글, 조회수를 모아 오늘의 인기글 Top 10을 보여줍니다. 
 
