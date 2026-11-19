@@ -32,9 +32,22 @@ modu:
       replay-send-timeout-seconds: ${KAFKA_DLQ_REPLAY_SEND_TIMEOUT_SECONDS:5}
       # DLQ 재발행 뒤에도 일시 오류가 반복되면 3회 뒤 PARKING 토픽에 보존한다.
       max-replay-attempts: ${KAFKA_DLQ_MAX_REPLAY_ATTEMPTS:3}
+  hot-article:
+    rebuild:
+      # 기동 뒤 게시글 조회 서비스의 목록으로 오늘의 인기글을 다시 채운다.
+      # 인기글은 이벤트로만 쌓이므로 SQL 초기 데이터나 Redis 유실 뒤에는 이 단계가 없으면 비어 있다.
+      enabled: ${HOT_ARTICLE_REBUILD_ENABLED:true}
+      board-ids: ${HOT_ARTICLE_REBUILD_BOARD_IDS:2}
+      page-size: ${HOT_ARTICLE_REBUILD_PAGE_SIZE:100}
+      max-pages: ${HOT_ARTICLE_REBUILD_MAX_PAGES:10}
+      # 게시글 조회 서비스가 늦게 뜰 수 있어 10초 간격으로 최대 12번 시도한다.
+      max-attempts: ${HOT_ARTICLE_REBUILD_MAX_ATTEMPTS:12}
+      retry-interval-ms: ${HOT_ARTICLE_REBUILD_RETRY_INTERVAL_MS:10000}
 endpoints:
   board-article-service:
     url: ${ARTICLE_SERVICE_URL:http://127.0.0.1:9000}
+  board-article-read-service:
+    url: ${ARTICLE_READ_SERVICE_URL:http://127.0.0.1:9005}
 management:
   endpoints:
     web:

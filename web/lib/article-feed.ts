@@ -1,4 +1,4 @@
-import type { Article } from "./community-api";
+import type { Article, HotArticle } from "./community-api";
 
 export const ARTICLE_TAGS = [
   "일상",
@@ -90,4 +90,19 @@ export function paginationItems(currentPage: number, totalPages: number) {
 export function articleTopicFromSearch(search: string): string {
   const topic = new URLSearchParams(search).get("topic");
   return ARTICLE_TAGS.find((item) => item === topic) ?? "전체";
+}
+
+// Keep the order supplied by Hot Article Service; only join the local board's article details.
+export function rankedArticles(
+  articles: Article[],
+  ranking: Pick<HotArticle, "articleId">[],
+): Article[] {
+  const byId = new Map(articles.map((article) => [article.articleId, article]));
+  const seen = new Set<string>();
+  return ranking.flatMap((item) => {
+    const article = byId.get(item.articleId);
+    if (!article || seen.has(item.articleId)) return [];
+    seen.add(item.articleId);
+    return [article];
+  });
 }

@@ -3,6 +3,7 @@ package board.hotarticle.repository;
 import board.common.event.payload.ArticleCreatedEventPayload;
 import board.common.event.payload.ArticleUpdatedEventPayload;
 import board.hotarticle.client.ArticleClient;
+import board.hotarticle.client.ArticleReadClient;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -22,6 +23,10 @@ public class HotArticleQueryModel {
     }
 
     public static HotArticleQueryModel create(ArticleClient.ArticleResponse response) {
+        return create(response.getArticleId(), response.getTitle(), response.getCreatedAt());
+    }
+
+    public static HotArticleQueryModel create(ArticleReadClient.ArticleReadResponse response) {
         return create(response.getArticleId(), response.getTitle(), response.getCreatedAt());
     }
 

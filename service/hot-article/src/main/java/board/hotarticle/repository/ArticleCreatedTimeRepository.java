@@ -24,6 +24,15 @@ public class ArticleCreatedTimeRepository {
         );
     }
 
+    /** 재구성 경로 전용. 이벤트가 먼저 쓴 값이 있으면 덮어쓰지 않는다. */
+    public void createIfAbsent(Long articleId, LocalDateTime createdAt, Duration ttl) {
+        redisTemplate.opsForValue().setIfAbsent(
+                generateKey(articleId),
+                String.valueOf(createdAt.toInstant(ZoneOffset.UTC).toEpochMilli()),
+                ttl
+        );
+    }
+
     public void delete(Long articleId) {
         redisTemplate.delete(generateKey(articleId));
     }

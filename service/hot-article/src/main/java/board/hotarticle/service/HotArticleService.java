@@ -6,6 +6,9 @@ import board.common.event.payload.EventType;
 import board.hotarticle.client.ArticleClient;
 import board.hotarticle.kafka.HotArticleEventPosition;
 import board.hotarticle.kafka.InvalidHotArticleEventException;
+import board.hotarticle.repository.ArticleCommentCountRepository;
+import board.hotarticle.repository.ArticleLikeCountRepository;
+import board.hotarticle.repository.ArticleViewCountRepository;
 import board.hotarticle.repository.HotArticleListRepository;
 import board.hotarticle.repository.HotArticleQueryModel;
 import board.hotarticle.repository.HotArticleQueryModelRepository;
@@ -33,6 +36,9 @@ public class HotArticleService {
     private final HotArticleQueryModelRepository hotArticleQueryModelRepository;
     private final HotArticleReadModelMetrics hotArticleReadModelMetrics;
     private final HotArticleEventVersionGuard eventVersionGuard;
+    private final ArticleLikeCountRepository articleLikeCountRepository;
+    private final ArticleCommentCountRepository articleCommentCountRepository;
+    private final ArticleViewCountRepository articleViewCountRepository;
 
     public boolean handleIfLatest(Event<EventPayload> event, HotArticleEventPosition position) {
         EventHandler<EventPayload> eventHandler = findEventHandler(event);
@@ -100,10 +106,19 @@ public class HotArticleService {
             queryModels.put(articleId, queryModel);
         }
 
+        Map<Long, Long> likeCounts = articleLikeCountRepository.readAll(articleIds);
+        Map<Long, Long> commentCounts = articleCommentCountRepository.readAll(articleIds);
+        Map<Long, Long> viewCounts = articleViewCountRepository.readAll(articleIds);
+
         return articleIds.stream()
                 .map(queryModels::get)
                 .filter(Objects::nonNull)
-                .map(HotArticleResponse::from)
+                .map(queryModel -> HotArticleResponse.from(
+                        queryModel,
+                        likeCounts.getOrDefault(queryModel.getArticleId(), 0L),
+                        commentCounts.getOrDefault(queryModel.getArticleId(), 0L),
+                        viewCounts.getOrDefault(queryModel.getArticleId(), 0L)
+                ))
                 .toList();
     }
 

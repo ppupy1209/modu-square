@@ -4,6 +4,9 @@ import board.common.event.Event;
 import board.common.event.payload.EventType;
 import board.hotarticle.client.ArticleClient;
 import board.hotarticle.kafka.HotArticleEventPosition;
+import board.hotarticle.repository.ArticleCommentCountRepository;
+import board.hotarticle.repository.ArticleLikeCountRepository;
+import board.hotarticle.repository.ArticleViewCountRepository;
 import board.hotarticle.repository.HotArticleListRepository;
 import board.hotarticle.repository.HotArticleQueryModel;
 import board.hotarticle.repository.HotArticleQueryModelRepository;
@@ -50,6 +53,12 @@ class HotArticleServiceTest {
     HotArticleReadModelMetrics hotArticleReadModelMetrics;
     @Mock
     HotArticleEventVersionGuard eventVersionGuard;
+    @Mock
+    ArticleLikeCountRepository articleLikeCountRepository;
+    @Mock
+    ArticleCommentCountRepository articleCommentCountRepository;
+    @Mock
+    ArticleViewCountRepository articleViewCountRepository;
 
     @Test
     void handleEventIfEventHandlerNotFoundTest() {
@@ -148,9 +157,18 @@ class HotArticleServiceTest {
         given(hotArticleQueryModelRepository.readAll(List.of(1L, 2L)))
                 .willReturn(Map.of(1L, first, 2L, second));
 
+        given(articleLikeCountRepository.readAll(List.of(1L, 2L))).willReturn(Map.of(1L, 5L, 2L, 0L));
+        given(articleCommentCountRepository.readAll(List.of(1L, 2L))).willReturn(Map.of(1L, 3L, 2L, 0L));
+        given(articleViewCountRepository.readAll(List.of(1L, 2L))).willReturn(Map.of(1L, 20L, 2L, 0L));
+
         List<HotArticleResponse> responses = hotArticleService.readAll(date);
 
         assertThat(responses).extracting(HotArticleResponse::getArticleId).containsExactly(1L, 2L);
+        assertThat(responses.get(0).getArticleLikeCount()).isEqualTo(5L);
+        assertThat(responses.get(0).getArticleCommentCount()).isEqualTo(3L);
+        assertThat(responses.get(0).getArticleViewCount()).isEqualTo(20L);
+        assertThat(responses.get(1).getArticleLikeCount()).isZero();
+        verify(articleLikeCountRepository, never()).read(anyLong());
         verify(hotArticleReadModelMetrics).hit(2);
         verify(articleClient, never()).read(anyLong());
     }

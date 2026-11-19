@@ -25,6 +25,15 @@ public class HotArticleQueryModelRepository {
         );
     }
 
+    /** 재구성 경로 전용. 이벤트가 먼저 쓴 값이 있으면 덮어쓰지 않는다. */
+    public void createIfAbsent(HotArticleQueryModel queryModel, Duration ttl) {
+        redisTemplate.opsForValue().setIfAbsent(
+                generateKey(queryModel.getArticleId()),
+                DataSerializer.serialize(queryModel),
+                ttl
+        );
+    }
+
     public Map<Long, HotArticleQueryModel> readAll(List<Long> articleIds) {
         if (articleIds.isEmpty()) {
             return Map.of();

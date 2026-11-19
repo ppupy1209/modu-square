@@ -40,6 +40,9 @@ export type HotArticle = {
   articleId: string;
   title: string;
   createdAt?: string;
+  articleLikeCount: number;
+  articleCommentCount: number;
+  articleViewCount: number;
 };
 
 export type ArticlePage = {
@@ -148,17 +151,19 @@ export async function fetchAllArticles(signal?: AbortSignal) {
   return [firstPage, ...remainingPages].flatMap((page) => page.articles);
 }
 
-export function popularScore(article: Article) {
-  return (article.articleLikeCount ?? 0) * 4
-    + (article.articleCommentCount ?? 0) * 3
-    + (article.articleViewCount ?? 0);
-}
+type HotArticleResponse = Partial<Omit<HotArticle, "articleId">> & { articleId: string | number };
 
-export async function fetchPopularArticles(signal?: AbortSignal) {
-  const page = await fetchArticlePage(1, 50, signal);
-  return [...page.articles]
-    .sort((left, right) => popularScore(right) - popularScore(left))
-    .slice(0, 10);
+// 순위와 점수는 Hot Article Service가 정한다. 화면은 받은 순서를 그대로 보여준다.
+export async function fetchPopularArticles(signal?: AbortSignal): Promise<HotArticle[]> {
+  const items = await requestJson<HotArticleResponse[] | undefined>(`${HOT_ARTICLE_API}/v1/hot-articles/articles`, { signal });
+  return (items ?? []).map((item) => ({
+    articleId: String(item.articleId),
+    title: item.title ?? "",
+    createdAt: item.createdAt,
+    articleLikeCount: item.articleLikeCount ?? 0,
+    articleCommentCount: item.articleCommentCount ?? 0,
+    articleViewCount: item.articleViewCount ?? 0,
+  }));
 }
 
 export async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {

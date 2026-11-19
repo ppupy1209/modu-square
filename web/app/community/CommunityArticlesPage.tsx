@@ -12,8 +12,9 @@ import { Icon, topicIcon } from "../Icon";
 import {
   Article,
   ArticleLikeStatus,
-  popularScore,
+  HotArticle,
   fetchAllArticles,
+  fetchPopularArticles,
   getOrCreateGuestIdentity,
   LIKE_API,
   requestJson,
@@ -23,6 +24,7 @@ import {
   ARTICLE_TAGS,
   articleTopicFromSearch,
   filterArticles,
+  rankedArticles,
   paginateArticles,
   paginationItems,
   withTags,
@@ -35,6 +37,7 @@ export function CommunityArticlesPage() {
   const [sortOrder, setSortOrder] = useState<"latest" | "popular">("latest");
   const [query, setQuery] = useState("");
   const [articles, setArticles] = useState<Article[]>([]);
+  const [popularArticles, setPopularArticles] = useState<HotArticle[]>([]);
   const [notice, setNotice] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,15 +95,24 @@ export function CommunityArticlesPage() {
     return () => controller.abort();
   }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchPopularArticles(controller.signal)
+      .then(setPopularArticles)
+      .catch((error: Error) => {
+        if (error.name !== "AbortError") setPopularArticles([]);
+      });
+    return () => controller.abort();
+  }, []);
+
   const showDirectory = category === "전체" && !query.trim();
   const filtered = useMemo(() => {
-    const items = filterArticles(articles, category, query);
-    return sortOrder === "popular"
-      ? [...items].sort(
-          (left, right) => popularScore(right) - popularScore(left),
-        )
-      : items;
-  }, [articles, category, query, sortOrder]);
+    const source =
+      sortOrder === "popular"
+        ? rankedArticles(articles, popularArticles)
+        : articles;
+    return filterArticles(source, category, query);
+  }, [articles, popularArticles, category, query, sortOrder]);
   const page = useMemo(
     () => paginateArticles(filtered, currentPage, PAGE_SIZE),
     [filtered, currentPage],

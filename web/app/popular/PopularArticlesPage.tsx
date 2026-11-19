@@ -7,10 +7,10 @@ import {
   CommunityHeader,
   CommunityPage,
 } from "../CommunityChrome";
-import { Article, fetchPopularArticles } from "../../lib/community-api";
+import { HotArticle, fetchPopularArticles } from "../../lib/community-api";
 
 export function PopularArticlesPage() {
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<HotArticle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 

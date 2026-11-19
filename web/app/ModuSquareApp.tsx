@@ -9,7 +9,7 @@ import { Icon } from "./Icon";
 import {
   Article,
   ArticleLikeStatus,
-  popularScore,
+  HotArticle,
   fetchAllArticles,
   fetchPopularArticles,
   getOrCreateGuestIdentity,
@@ -19,6 +19,7 @@ import {
 import {
   ARTICLE_CATEGORIES,
   filterArticles,
+  rankedArticles,
   paginateArticles,
   paginationItems,
   withTags,
@@ -38,7 +39,7 @@ export function ModuSquareApp() {
   const [sortOrder, setSortOrder] = useState<"latest" | "popular">("latest");
   const [query, setQuery] = useState("");
   const [articles, setArticles] = useState<Article[]>([]);
-  const [popularArticles, setPopularArticles] = useState<Article[]>([]);
+  const [popularArticles, setPopularArticles] = useState<HotArticle[]>([]);
   const [popularLoading, setPopularLoading] = useState(true);
   const [popularError, setPopularError] = useState(false);
   const [notice, setNotice] = useState("");
@@ -105,13 +106,12 @@ export function ModuSquareApp() {
   }, []);
 
   const filtered = useMemo(() => {
-    const items = filterArticles(articles, category, query);
-    return sortOrder === "popular"
-      ? [...items].sort(
-          (left, right) => popularScore(right) - popularScore(left),
-        )
-      : items;
-  }, [articles, category, query, sortOrder]);
+    const source =
+      sortOrder === "popular"
+        ? rankedArticles(articles, popularArticles)
+        : articles;
+    return filterArticles(source, category, query);
+  }, [articles, popularArticles, category, query, sortOrder]);
 
   const page = useMemo(
     () => paginateArticles(filtered, currentPage, PAGE_SIZE),
@@ -224,7 +224,11 @@ export function ModuSquareApp() {
       return;
     const nextLiked = !likedIds.has(articleId);
     const delta = nextLiked ? 1 : -1;
-    const updateLikeCount = (items: Article[]) =>
+    const updateLikeCount = <
+      T extends Pick<Article, "articleId" | "articleLikeCount">,
+    >(
+      items: T[],
+    ) =>
       items.map((article) =>
         article.articleId === articleId
           ? {

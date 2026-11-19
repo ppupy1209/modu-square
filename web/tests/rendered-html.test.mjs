@@ -161,6 +161,18 @@ test("paginates each topic from its own filtered articles", async () => {
   assert.equal(feed.articleTopicFromSearch("?topic=unknown"), "전체");
   assert.equal(feed.articleTopicFromSearch("?q=책"), "전체");
 
+  const rankSource = [makeArticle(201, "첫 글"), makeArticle(202, "다른 글")];
+  assert.deepEqual(
+    feed.rankedArticles(rankSource, [
+      { articleId: "202" },
+      { articleId: "201" },
+      { articleId: "202" },
+      { articleId: "missing" },
+    ]),
+    [rankSource[1], rankSource[0]],
+  );
+  assert.deepEqual(feed.rankedArticles(rankSource, []), []);
+
   const legacyArticle = makeArticle(90, "기존 글");
   const memberArticle = {
     ...makeArticle(91, "회원 글"),
