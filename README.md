@@ -2,25 +2,27 @@
 
 Modu Square는 오늘의 생각을 나누고, 다른 사람의 취향과 질문을 발견하는 커뮤니티입니다.
 
-![Modu Square 메인 화면](docs/images/modu-square-home.png)
+![Modu Square 메인 화면](docs/images/modu-square-home-20261119.jpg)
+
+화면은 로컬 예시 게시글로 촬영했습니다.
 
 ## 주요 기능
 
 ### 주제별 커뮤니티
 
-![주제별 커뮤니티 화면](docs/images/modu-square-community.png)
+![주제별 커뮤니티 화면](docs/images/modu-square-community-20261119.jpg)
 
-전체, 일상, 취향, 질문, 동네, 여행 중 관심 있는 주제를 골라 둘러보세요. 
+일상, 취향, 질문, 동네, 여행, 정보의 여섯 주제에서 관심 있는 이야기를 둘러보세요.
 
 ### 글과 대화
 
-![게시글 상세 화면](docs/images/modu-square-article.png)
+![게시글 상세 화면](docs/images/modu-square-article-20261119.jpg)
 
 게시글을 열면 내용과 조회수, 좋아요, 댓글을 한곳에서 확인할 수 있습니다.
 
 ### 오늘의 인기글
 
-![오늘의 인기글 Top 10 화면](docs/images/modu-square-popular.png)
+![오늘의 인기글 Top 10 화면](docs/images/modu-square-popular-20261119.jpg)
 
 좋아요, 댓글, 조회수를 모아 오늘의 인기글 Top 10을 보여줍니다. 
 
