@@ -8,6 +8,7 @@ import {
   CommunityPage,
 } from "../CommunityChrome";
 import { HotArticle, fetchPopularArticles } from "../../lib/community-api";
+import { Icon } from "../Icon";
 
 export function PopularArticlesPage() {
   const [articles, setArticles] = useState<HotArticle[]>([]);
@@ -61,17 +62,35 @@ export function PopularArticlesPage() {
               {articles.map((article, index) => (
                 <li key={article.articleId}>
                   <strong>{String(index + 1).padStart(2, "0")}</strong>
-                  <Link href={`/articles/${article.articleId}`}>
-                    <span>{article.title}</span>
-                    <small>
-                      좋아요{" "}
-                      {(article.articleLikeCount ?? 0).toLocaleString("ko-KR")}
-                      개, 대화{" "}
-                      {(article.articleCommentCount ?? 0).toLocaleString(
-                        "ko-KR",
-                      )}
-                      개 <b>→</b>
-                    </small>
+                  <Link
+                    className="popular-article-link"
+                    href={`/articles/${article.articleId}`}
+                  >
+                    <span className="popular-article-title">
+                      {article.title}
+                    </span>
+                    <span className="popular-row-stats">
+                      <span className="popular-row-stat">
+                        <Icon name="heart" />
+                        <span>좋아요</span>
+                        <strong>
+                          {(article.articleLikeCount ?? 0).toLocaleString(
+                            "ko-KR",
+                          )}
+                        </strong>
+                        <span className="sr-only">개</span>
+                      </span>
+                      <span className="popular-row-stat">
+                        <Icon name="comment" />
+                        <span>댓글</span>
+                        <strong>
+                          {(article.articleCommentCount ?? 0).toLocaleString(
+                            "ko-KR",
+                          )}
+                        </strong>
+                        <span className="sr-only">개</span>
+                      </span>
+                    </span>
                   </Link>
                 </li>
               ))}

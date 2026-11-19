@@ -13,7 +13,7 @@ Modu Square는 오늘의 생각을 나누고, 다른 사람의 취향과 질문�
 
 일상, 취향, 질문, 동네, 여행, 정보의 여섯 주제에서 관심 있는 이야기를 둘러보세요.
 
-### 글과 대화
+### 글과 댓글
 
 ![게시글 상세 화면](docs/images/modu-square-article-20261119.jpg)
 
@@ -21,7 +21,7 @@ Modu Square는 오늘의 생각을 나누고, 다른 사람의 취향과 질문�
 
 ### 오늘의 인기글
 
-![오늘의 인기글 Top 10 화면](docs/images/modu-square-popular-20261119.jpg)
+![오늘의 인기글과 좋아요, 댓글 수](docs/images/modu-square-popular-20261119-v2.jpg)
 
 좋아요, 댓글, 조회수를 모아 오늘의 인기글 Top 10을 보여줍니다. 
 
