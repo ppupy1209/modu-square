@@ -1,9 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, ReactNode, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getOrCreateGuestIdentity, NOTIFICATION_API, Notification as NotificationItem } from "../lib/community-api";
+import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Icon } from "./Icon";
+import {
+  getOrCreateGuestIdentity,
+  NOTIFICATION_API,
+  Notification as NotificationItem,
+} from "../lib/community-api";
 import { AuthMember, logoutMember, restoreAuthMember } from "../lib/auth-api";
 
 type HeaderProps = {
@@ -15,14 +20,23 @@ type HeaderProps = {
 
 function notificationSummary(notification: NotificationItem) {
   const parts: string[] = [];
-  if (notification.commentCount) parts.push(`\uB313\uAE00 ${notification.commentCount}\uAC1C`);
-  if (notification.likeCount) parts.push(`\uC88B\uC544\uC694 ${notification.likeCount}\uAC1C`);
+  if (notification.commentCount)
+    parts.push(`\uB313\uAE00 ${notification.commentCount}\uAC1C`);
+  if (notification.likeCount)
+    parts.push(`\uC88B\uC544\uC694 ${notification.likeCount}\uAC1C`);
   return parts.join(" \u00B7 ");
 }
 
-export function CommunityHeader({ query, onQueryChange, onSearchSubmit, active }: HeaderProps) {
+export function CommunityHeader({
+  query,
+  onQueryChange,
+  onSearchSubmit,
+  active,
+}: HeaderProps) {
   const router = useRouter();
   const [localQuery, setLocalQuery] = useState("");
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [guestUserId, setGuestUserId] = useState("");
@@ -35,7 +49,10 @@ export function CommunityHeader({ query, onQueryChange, onSearchSubmit, active }
 
   useEffect(() => {
     const identity = getOrCreateGuestIdentity();
-    const restoreGuest = window.setTimeout(() => setGuestUserId(identity.userId), 0);
+    const restoreGuest = window.setTimeout(
+      () => setGuestUserId(identity.userId),
+      0,
+    );
     return () => {
       window.clearTimeout(restoreGuest);
     };
@@ -49,12 +66,16 @@ export function CommunityHeader({ query, onQueryChange, onSearchSubmit, active }
         setIsAuthResolved(true);
       }
     });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const notificationUserId = authMember
     ? String(authMember.memberId)
-    : isAuthResolved ? guestUserId : "";
+    : isAuthResolved
+      ? guestUserId
+      : "";
 
   useEffect(() => {
     if (!notificationUserId) return;
@@ -62,11 +83,14 @@ export function CommunityHeader({ query, onQueryChange, onSearchSubmit, active }
 
     async function loadNotifications() {
       try {
-        const response = await fetch(`${NOTIFICATION_API}/v1/notifications/users/${notificationUserId}?limit=10`, {
-          signal: controller.signal,
-        });
+        const response = await fetch(
+          `${NOTIFICATION_API}/v1/notifications/users/${notificationUserId}?limit=10`,
+          {
+            signal: controller.signal,
+          },
+        );
         if (!response.ok) return;
-        const data = await response.json() as NotificationItem[];
+        const data = (await response.json()) as NotificationItem[];
         setNotifications(data);
       } catch {
         // Keep the community available while the notification service is starting.
@@ -81,10 +105,15 @@ export function CommunityHeader({ query, onQueryChange, onSearchSubmit, active }
     };
   }, [notificationUserId]);
 
-  const totalEventCount = notifications.reduce((sum, notification) => sum + notification.eventCount, 0);
-  const notificationBadge = totalEventCount > 99 ? "99+" : String(totalEventCount);
+  const totalEventCount = notifications.reduce(
+    (sum, notification) => sum + notification.eventCount,
+    0,
+  );
+  const notificationBadge =
+    totalEventCount > 99 ? "99+" : String(totalEventCount);
 
   function submit(event: FormEvent<HTMLFormElement>) {
+    setIsMobileSearchOpen(false);
     if (onSearchSubmit) {
       onSearchSubmit(event);
       return;
@@ -111,120 +140,255 @@ export function CommunityHeader({ query, onQueryChange, onSearchSubmit, active }
   }
 
   return (
-    <header className="topbar">
-      <Link className="brand" href="/" aria-label="Modu Square 홈">
-        <span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>
-        <span>Modu Square</span>
-      </Link>
-      <nav className="main-nav" aria-label="주요 메뉴">
-        <Link className={active === "home" ? "active" : undefined} href="/">홈</Link>
-        <Link className={active === "popular" ? "active" : undefined} href="/popular">인기글</Link>
-        <Link className={active === "community" ? "active" : undefined} href="/community">커뮤니티</Link>
-      </nav>
-      <form className="search" onSubmit={submit} role="search">
-        <span aria-hidden="true">⌕</span>
-        <input
-          value={searchValue}
-          onChange={(event) => onQueryChange ? onQueryChange(event.target.value) : setLocalQuery(event.target.value)}
-          placeholder="관심 있는 이야기 검색"
-          aria-label="게시글 검색"
-        />
-        <button className="search-submit" type="submit" aria-label="검색">↵</button>
-      </form>
-      <Link className="write-button" href="/write">새 글 쓰기</Link>
-      <div className="notification-menu">
-        <button
-          className="notification-button"
-          type="button"
-          aria-expanded={isNotificationOpen}
-          aria-label={`\uCD5C\uADFC \uC54C\uB9BC ${totalEventCount}\uAC74`}
-          onClick={() => {
-            setIsNotificationOpen((open) => !open);
-            setIsAccountOpen(false);
-          }}
-        >
-          <span aria-hidden="true">{"\uC54C\uB9BC"}</span>
-          {totalEventCount > 0 && <b>{notificationBadge}</b>}
-        </button>
-        {isNotificationOpen && (
-          <section className="notification-panel" aria-label={"\uCD5C\uADFC \uC54C\uB9BC"}>
-            <div className="notification-panel-heading">
-              <strong>{"\uCD5C\uADFC \uC54C\uB9BC"}</strong>
-              <span>{"5\uBD84 \uB2E8\uC704 \uBB36\uC74C"}</span>
-            </div>
-            {notifications.length ? (
-              <ul>
-                {notifications.map((notification) => (
-                  <li key={notification.notificationId}>
-                    <Link href={`/articles/${notification.articleId}`} onClick={() => setIsNotificationOpen(false)}>
-                      <strong>{notification.title}</strong>
-                      <span>{notificationSummary(notification)}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="notification-empty">{"\uC0C8\uB85C\uC6B4 \uC54C\uB9BC\uC774 \uC5C6\uC2B5\uB2C8\uB2E4."}</p>
-            )}
-          </section>
-        )}
-      </div>
-      <div className="account-menu">
-        <button
-          className={`profile-button ${authMember ? "member-profile" : "guest-profile"}`}
-          type="button"
-          aria-expanded={isAccountOpen}
-          aria-label={authMember ? `${authMember.displayName} 계정 메뉴` : "Guest 계정 메뉴"}
-          onClick={() => {
-            setIsAccountOpen((open) => !open);
+    <>
+      <a className="skip-link" href="#main-content">
+        본문으로 이동
+      </a>
+      <header
+        className={`topbar${isMobileSearchOpen ? " mobile-search-open" : ""}`}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
             setIsNotificationOpen(false);
-            setAccountError("");
-          }}
-        >
-          {authMember?.displayName ?? "Guest"}
-        </button>
-        {isAccountOpen && (
-          <section className="account-panel" aria-label={authMember ? "회원 계정" : "Guest 계정"}>
-            {authMember ? (
-              <>
-                <div className="account-summary">
-                  <strong>{authMember.displayName}</strong>
-                  <span>{authMember.email}</span>
-                </div>
-                {accountError && <p className="account-error" role="alert">{accountError}</p>}
-                <button className="account-logout" type="button" onClick={logout} disabled={isLoggingOut}>
-                  {isLoggingOut ? "로그아웃 중..." : "로그아웃"}
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="account-summary">
-                  <strong>Guest</strong>
-                  <span>가입 없이 둘러보고 있어요.</span>
-                </div>
-                <Link className="account-primary" href="/auth" onClick={() => setIsAccountOpen(false)}>로그인 · 회원가입</Link>
-                {guestUserId && (
-                  <Link className="account-secondary" href={`/?q=modu_${guestUserId}`} onClick={() => setIsAccountOpen(false)}>Guest로 쓴 글</Link>
-                )}
-              </>
-            )}
-          </section>
-        )}
-      </div>
-    </header>
+            setIsAccountOpen(false);
+            setIsMobileSearchOpen(false);
+          }
+        }}
+      >
+        <div className="topbar-inner">
+          <Link className="brand" href="/" aria-label="Modu Square 홈">
+            <span className="brand-mark" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
+            <span>Modu Square</span>
+          </Link>
+          <nav className="main-nav" aria-label="주요 메뉴">
+            <Link
+              className={active === "home" ? "active" : undefined}
+              href="/"
+              aria-current={active === "home" ? "page" : undefined}
+            >
+              홈
+            </Link>
+            <Link
+              className={active === "popular" ? "active" : undefined}
+              href="/popular"
+              aria-current={active === "popular" ? "page" : undefined}
+            >
+              인기글
+            </Link>
+            <Link
+              className={active === "community" ? "active" : undefined}
+              href="/community"
+              aria-current={active === "community" ? "page" : undefined}
+            >
+              커뮤니티
+            </Link>
+          </nav>
+          <form className="search" onSubmit={submit} role="search">
+            <Icon name="search" />
+            <input
+              ref={searchInputRef}
+              type="search"
+              value={searchValue}
+              onChange={(event) =>
+                onQueryChange
+                  ? onQueryChange(event.target.value)
+                  : setLocalQuery(event.target.value)
+              }
+              placeholder="관심 있는 이야기 검색"
+              aria-label="게시글 검색"
+            />
+            <button className="search-submit" type="submit" aria-label="검색">
+              <Icon name="right" />
+            </button>
+          </form>
+          <div className="header-actions">
+            <Link className="write-button" href="/write">
+              <Icon name="pen" />
+              글쓰기
+            </Link>
+            <button
+              className="mobile-search-toggle icon-button"
+              type="button"
+              aria-label="게시글 검색 열기"
+              aria-expanded={isMobileSearchOpen}
+              onClick={() => {
+                setIsMobileSearchOpen((open) => !open);
+                window.requestAnimationFrame(() =>
+                  searchInputRef.current?.focus(),
+                );
+              }}
+            >
+              <Icon name="search" />
+            </button>
+            <div className="notification-menu">
+              <button
+                className="notification-button icon-button"
+                type="button"
+                aria-expanded={isNotificationOpen}
+                aria-label={`최근 알림 ${totalEventCount}건`}
+                onClick={() => {
+                  setIsNotificationOpen((open) => !open);
+                  setIsAccountOpen(false);
+                }}
+              >
+                <Icon name="bell" />
+                {totalEventCount > 0 && <b>{notificationBadge}</b>}
+              </button>
+              {isNotificationOpen && (
+                <section className="notification-panel" aria-label="최근 알림">
+                  <div className="notification-panel-heading">
+                    <strong>최근 알림</strong>
+                    <span>5분 단위 묶음</span>
+                  </div>
+                  {notifications.length ? (
+                    <ul>
+                      {notifications.map((notification) => (
+                        <li key={notification.notificationId}>
+                          <Link
+                            href={`/articles/${notification.articleId}`}
+                            onClick={() => setIsNotificationOpen(false)}
+                          >
+                            <strong>{notification.title}</strong>
+                            <span>{notificationSummary(notification)}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="notification-empty">
+                      새로운 알림이 없습니다.
+                    </p>
+                  )}
+                </section>
+              )}
+            </div>
+            <div className="account-menu">
+              <button
+                className={`profile-button ${authMember ? "member-profile" : "guest-profile"}`}
+                type="button"
+                aria-expanded={isAccountOpen}
+                aria-label={
+                  authMember
+                    ? `${authMember.displayName} 계정 메뉴`
+                    : "Guest 계정 메뉴"
+                }
+                onClick={() => {
+                  setIsAccountOpen((open) => !open);
+                  setIsNotificationOpen(false);
+                  setAccountError("");
+                }}
+              >
+                <Icon name="user" />
+                <span>{authMember?.displayName ?? "Guest"}</span>
+              </button>
+              {isAccountOpen && (
+                <section
+                  className="account-panel"
+                  aria-label={authMember ? "회원 계정" : "Guest 계정"}
+                >
+                  {authMember ? (
+                    <>
+                      <div className="account-summary">
+                        <strong>{authMember.displayName}</strong>
+                        <span>{authMember.email}</span>
+                      </div>
+                      {accountError && (
+                        <p className="account-error" role="alert">
+                          {accountError}
+                        </p>
+                      )}
+                      <button
+                        className="account-logout"
+                        type="button"
+                        onClick={logout}
+                        disabled={isLoggingOut}
+                      >
+                        {isLoggingOut ? "로그아웃 중..." : "로그아웃"}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="account-summary">
+                        <strong>Guest</strong>
+                        <span>가입 없이 둘러보고 있어요.</span>
+                      </div>
+                      <Link
+                        className="account-primary"
+                        href="/auth"
+                        onClick={() => setIsAccountOpen(false)}
+                      >
+                        로그인 · 회원가입
+                      </Link>
+                      {guestUserId && (
+                        <Link
+                          className="account-secondary"
+                          href={`/?q=modu_${guestUserId}`}
+                          onClick={() => setIsAccountOpen(false)}
+                        >
+                          Guest로 쓴 글
+                        </Link>
+                      )}
+                    </>
+                  )}
+                </section>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+    </>
   );
 }
 
 export function CommunityFooter() {
+  const pathname = usePathname();
   return (
-    <footer>
-      <span>© 2026 Modu Square</span>
-      <span>오늘의 생각이 편안한 대화가 되는 곳</span>
-      <nav><Link href="/popular">인기글</Link><Link href="/community">커뮤니티</Link><Link href="/write">새 글 쓰기</Link></nav>
-    </footer>
+    <>
+      <footer className="site-footer">
+        <span>© 2026 Modu Square</span>
+        <span>일상과 취향을 편안하게 나누는 곳</span>
+        <nav aria-label="하단 메뉴">
+          <Link href="/popular">인기글</Link>
+          <Link href="/community">커뮤니티</Link>
+          <Link href="/write">글쓰기</Link>
+        </nav>
+      </footer>
+      <nav className="mobile-nav" aria-label="모바일 주요 메뉴">
+        {(
+          [
+            { href: "/", label: "홈", icon: "home" },
+            { href: "/popular", label: "인기글", icon: "popular" },
+            { href: "/community", label: "커뮤니티", icon: "community" },
+            { href: "/write", label: "글쓰기", icon: "pen" },
+          ] as const
+        ).map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={pathname === item.href ? "page" : undefined}
+          >
+            <Icon name={item.icon} />
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+    </>
   );
 }
 
-export function CommunityPage({ children, className = "community-page" }: { children: ReactNode; className?: string }) {
-  return <main className={className}>{children}</main>;
+export function CommunityPage({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <main id="main-content" className={`community-page ${className}`.trim()}>
+      {children}
+    </main>
+  );
 }
