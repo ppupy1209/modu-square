@@ -2,7 +2,7 @@
 
 Modu Square는 오늘의 생각을 나누고, 다른 사람의 취향과 질문을 발견하는 커뮤니티입니다.
 
-![Modu Square 메인 화면](docs/images/modu-square-home-20261119.jpg)
+![Modu Square 메인 화면](docs/images/modu-square-home-20261119-v2.jpg)
 
 
 ## 주요 기능

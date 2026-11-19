@@ -214,6 +214,13 @@ h2 { font-size: 17px; font-weight: 680; line-height: 1.5; letter-spacing: -.025e
 .page-state { border: 0; border-radius: 0; min-height: 330px; }.page-state strong { font-size: 17px; font-weight: 600; }
 .auth-page { max-width: none; margin: 0; min-height: calc(100vh - 190px); padding: 58px 24px 66px; background: white; }.auth-card { padding: 34px; border: 1px solid var(--line); border-radius: 14px; box-shadow: none; background: white; }.auth-kicker { display: none; }.auth-card h1 { font-size: 28px; line-height: 1.4; }.auth-copy { font-size: 14px; }.auth-form label { font-weight: 600; }.auth-tabs { border: 0; background: var(--soft); }.auth-tabs button { font-weight: 550; }.auth-tabs button[aria-selected="true"] { box-shadow: none; font-weight: 650; }.auth-submit { font-weight: 600; background: var(--blue); }.auth-submit:hover { box-shadow: none; background: #1859c0; }
 .popular-page-card { max-width: 850px; margin: 0 auto; }.popular-page-card .side-title { margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid var(--line); }.popular-page-card ol { list-style: none; padding: 0; margin: 0; }.popular-page-card li { display: flex; align-items: baseline; gap: 24px; padding: 25px 0; border-bottom: 1px solid var(--line); }.popular-page-card li > strong { color: var(--blue); font-size: 18px; font-weight: 650; font-variant-numeric: tabular-nums; }.popular-page-card li > a { min-width: 0; }.popular-page-card li a > span { display: block; font-size: 18px; line-height: 1.6; font-weight: 600; word-break: keep-all; overflow-wrap: anywhere; }.popular-page-card li a:hover > span { color: var(--blue); }.popular-page-card small { display: block; margin-top: 9px; font-size: 12px; color: var(--muted); }.popular-page-card small b { display: none; }.live-dot { display: none; }
+@media (min-width: 761px) {
+  .home-layout .article-row { padding: 18px 0 16px; }
+  .home-layout .article-excerpt { margin-top: 6px; }
+  .home-layout .article-row-bottom { margin-top: 11px; }
+  .home-layout .popular-list { gap: 16px; }
+  .home-layout .topic-navigation { margin-top: 26px; padding-top: 25px; }
+}
 @media (max-width: 1190px) {
   .topbar-inner { margin: 0 38px; gap: 22px; }.header-actions { gap: 12px; }.main-nav { gap: 19px; }
   .home-layout { margin-inline: 38px; column-gap: 42px; }.community-page { margin-inline: 38px; }.site-footer { margin-inline: 38px; }.topic-directory { column-gap: 42px; }.auth-page { margin: 0; }

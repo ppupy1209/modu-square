@@ -92,7 +92,7 @@ export function ModuSquareApp() {
   useEffect(() => {
     const controller = new AbortController();
     fetchPopularArticles(controller.signal)
-      .then((items) => setPopularArticles(items.slice(0, 5)))
+      .then((items) => setPopularArticles(items.slice(0, 10)))
       .catch((error: Error) => {
         if (error.name !== "AbortError") {
           setPopularArticles([]);
